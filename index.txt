@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة إدارة معرفة AI Agent | صندوق الحماية الاجتماعية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#3B564D;
+  --green-dark:#2B3F38;
+  --gold:#CCA862;
+  --gold-dark:#B08F4F;
+  --ink:#20262A;
+  --muted:#6B7970;
+  --line:#E4E8E5;
+  --card:#FFFFFF;
+  --bg:#F5F6F4;
+  --bg-soft:#F1F3F1;
+  --gold-soft:#FBF7EE;
+  --danger:#B3492E;
+  --danger-soft:#FBEDE8;
+  --ok:#3B7A57;
+  --ok-soft:#EAF4EE;
+  --warn:#B08A2E;
+  --warn-soft:#FAF3E3;
+  --radius:12px;
+  --shadow: 0 1px 2px rgba(20,30,25,.06), 0 4px 14px rgba(20,30,25,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#EDEFEC; --muted:#9CA8A0; --line:#33403A; --card:#1B2320; --bg:#141A17;
+    --bg-soft:#1E2622; --gold-soft:#2A2419; --danger-soft:#3A2420; --ok-soft:#1B2E22; --warn-soft:#332A17;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#EDEFEC; --muted:#9CA8A0; --line:#33403A; --card:#1B2320; --bg:#141A17;
+  --bg-soft:#1E2622; --gold-soft:#2A2419; --danger-soft:#3A2420; --ok-soft:#1B2E22; --warn-soft:#332A17;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+}
+button{font-family:inherit;}
+input,textarea,select{font-family:inherit;}
+
+/* ---------- layout ---------- */
+.app{display:flex; min-height:100vh;}
+.sidebar{
+  width:250px; flex:none; background:var(--green); color:#fff;
+  display:flex; flex-direction:column; padding:20px 14px; gap:4px;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{display:flex; align-items:center; gap:10px; padding:6px 8px 18px 8px; border-bottom:1px solid rgba(255,255,255,.15); margin-bottom:14px;}
+.brand-mark{width:34px;height:34px;border-radius:8px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--green-dark);font-size:15px;flex:none;}
+.brand-text{font-size:13px; line-height:1.4;}
+.brand-text b{display:block; font-size:14.5px;}
+.nav-item{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px;
+  color:rgba(255,255,255,.82); cursor:pointer; font-size:14px; font-weight:500;
+  transition:background .15s;
+  user-select:none;
+}
+.nav-item .ic{width:20px; text-align:center; font-size:15px; flex:none;}
+.nav-item:hover{background:rgba(255,255,255,.08); color:#fff;}
+.nav-item.active{background:var(--gold); color:var(--green-dark); font-weight:700;}
+.nav-sep{height:1px; background:rgba(255,255,255,.12); margin:10px 4px;}
+.sidebar-foot{margin-top:auto; padding-top:14px; font-size:11px; color:rgba(255,255,255,.55); border-top:1px solid rgba(255,255,255,.12);}
+
+.main{flex:1; min-width:0; display:flex; flex-direction:column;}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:14px 26px; background:var(--card); border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:20;
+}
+.topbar h1{font-size:18px; margin:0; font-weight:700;}
+.topbar .sub{font-size:12.5px; color:var(--muted); margin-top:2px;}
+.top-actions{display:flex; align-items:center; gap:10px;}
+.role-toggle{display:flex; align-items:center; gap:8px; background:var(--bg-soft); border-radius:999px; padding:4px; border:1px solid var(--line);}
+.role-btn{border:none; background:transparent; padding:6px 14px; border-radius:999px; font-size:12.5px; cursor:pointer; color:var(--muted); font-weight:700;}
+.role-btn.active{background:var(--green); color:#fff;}
+.role-btn.active.spec{background:var(--gold-dark); color:#fff;}
+.name-input{border:1px solid var(--line); border-radius:8px; padding:7px 10px; font-size:12.5px; background:var(--card); color:var(--ink); width:130px;}
+
+.content{padding:24px 26px 60px; max-width:1280px; width:100%; margin:0 auto;}
+.page{display:none;}
+.page.active{display:block; animation:fade .18s ease;}
+@keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+/* ---------- generic pieces ---------- */
+.section-title{font-size:20px; font-weight:900; margin:0 0 4px;}
+.section-desc{font-size:13px; color:var(--muted); margin:0 0 20px;}
+.grid{display:grid; gap:16px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media (max-width:980px){.grid-4{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:repeat(2,1fr);}}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+.kpi{padding:18px 18px;}
+.kpi .num{font-size:30px; font-weight:900; color:var(--green); line-height:1;}
+:root[data-theme="dark"] .kpi .num{color:var(--gold);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .kpi .num{color:var(--gold);}}
+.kpi .lbl{font-size:12.5px; color:var(--muted); margin-top:8px;}
+.kpi .delta{font-size:11px; margin-top:6px; font-weight:700;}
+
+.toolbar{display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;}
+.search{flex:1; min-width:200px; border:1px solid var(--line); border-radius:9px; padding:9px 13px; font-size:13px; background:var(--card); color:var(--ink);}
+.select{border:1px solid var(--line); border-radius:9px; padding:9px 12px; font-size:13px; background:var(--card); color:var(--ink);}
+.btn{border:none; border-radius:9px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px;}
+.btn-primary{background:var(--green); color:#fff;}
+.btn-primary:hover{background:var(--green-dark);}
+.btn-gold{background:var(--gold); color:var(--green-dark);}
+.btn-gold:hover{background:var(--gold-dark); color:#fff;}
+.btn-ghost{background:var(--bg-soft); color:var(--ink); border:1px solid var(--line);}
+.btn-ghost:hover{background:var(--line);}
+.btn-danger{background:var(--danger-soft); color:var(--danger);}
+.btn-sm{padding:6px 11px; font-size:12px; border-radius:7px;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+
+.badge{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap;}
+.b-draft{background:var(--bg-soft); color:var(--muted);}
+.b-review{background:var(--warn-soft); color:var(--warn);}
+.b-approved{background:var(--gold-soft); color:var(--gold-dark);}
+.b-active{background:var(--ok-soft); color:var(--ok);}
+.b-retracted{background:var(--danger-soft); color:var(--danger);}
+.b-archived{background:var(--bg-soft); color:var(--muted);}
+.b-expired{background:var(--danger-soft); color:var(--danger);}
+.b-sensitive{background:var(--danger-soft); color:var(--danger);}
+.b-priority-Critical{background:var(--danger-soft); color:var(--danger);}
+.b-priority-High{background:var(--warn-soft); color:var(--warn);}
+.b-priority-Medium{background:var(--gold-soft); color:var(--gold-dark);}
+.b-priority-Low{background:var(--bg-soft); color:var(--muted);}
+
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th{text-align:right; font-size:11.5px; color:var(--muted); font-weight:700; padding:10px 12px; border-bottom:1px solid var(--line);}
+td{padding:11px 12px; border-bottom:1px solid var(--line); vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.row-click{cursor:pointer;}
+tr.row-click:hover{background:var(--bg-soft);}
+.tbl-wrap{overflow-x:auto;}
+.empty{padding:40px 20px; text-align:center; color:var(--muted); font-size:13px;}
+
+.tag{display:inline-block; background:var(--bg-soft); color:var(--muted); font-size:11px; padding:2px 8px; border-radius:6px; margin:2px;}
+
+/* modal / panel */
+.overlay{position:fixed; inset:0; background:rgba(20,25,22,.5); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:30px 16px; overflow-y:auto;}
+.overlay.open{display:flex;}
+.panel{background:var(--card); border-radius:16px; width:100%; max-width:760px; box-shadow:0 20px 60px rgba(0,0,0,.25); margin-top:10px;}
+.panel-head{display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--line);}
+.panel-head h3{margin:0; font-size:16.5px;}
+.panel-close{border:none; background:var(--bg-soft); width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:15px; color:var(--muted);}
+.panel-body{padding:20px 22px; max-height:70vh; overflow-y:auto;}
+.panel-foot{padding:16px 22px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:10px;}
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px;}
+.field input, .field textarea, .field select{
+  width:100%; border:1px solid var(--line); border-radius:9px; padding:9px 12px; font-size:13.5px;
+  background:var(--card); color:var(--ink); resize:vertical;
+}
+.field textarea{min-height:64px; line-height:1.6;}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.hint{font-size:11.5px; color:var(--muted); margin-top:5px;}
+.list-input-item{display:flex; gap:6px; margin-bottom:6px;}
+.list-input-item input{flex:1;}
+.list-input-item button{flex:none;}
+
+.ai-box{background:var(--gold-soft); border:1px dashed var(--gold-dark); border-radius:11px; padding:14px 16px; margin-bottom:16px;}
+.ai-box .ai-title{font-size:12.5px; font-weight:800; color:var(--gold-dark); display:flex; align-items:center; gap:6px; margin-bottom:8px;}
+.spinner{width:13px; height:13px; border:2px solid rgba(0,0,0,.15); border-top-color:var(--gold-dark); border-radius:50%; animation:spin .7s linear infinite; display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.notice{border-radius:10px; padding:12px 16px; font-size:12.5px; margin-bottom:18px; display:flex; gap:10px; align-items:flex-start;}
+.notice-info{background:var(--bg-soft); color:var(--muted);}
+.notice-warn{background:var(--warn-soft); color:var(--warn);}
+.notice-danger{background:var(--danger-soft); color:var(--danger);}
+
+.two-col{display:grid; grid-template-columns:1.4fr 1fr; gap:18px; align-items:start;}
+@media (max-width:900px){.two-col{grid-template-columns:1fr;}}
+
+.diff-box{background:var(--bg-soft); border-radius:10px; padding:12px 14px; font-size:12.5px; line-height:1.7;}
+.diff-box b{color:var(--muted); font-size:11px; display:block; margin-bottom:4px;}
+
+.stack{display:flex; flex-direction:column; gap:10px;}
+.hr{height:1px; background:var(--line); margin:16px 0;}
+.small{font-size:11.5px; color:var(--muted);}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:11.5px;}
+.flex-between{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.gap-card{border-inline-start:4px solid var(--gold);}
+.link-btn{background:none;border:none;color:var(--green);font-weight:700;font-size:12.5px;cursor:pointer;padding:0;}
+:root[data-theme="dark"] .link-btn{color:var(--gold);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .link-btn{color:var(--gold);}}
+
+.toast-wrap{position:fixed; bottom:20px; left:20px; z-index:200; display:flex; flex-direction:column; gap:8px;}
+.toast{background:var(--green-dark); color:#fff; padding:11px 18px; border-radius:9px; font-size:13px; box-shadow:var(--shadow); animation:fade .2s ease;}
+.toast.err{background:var(--danger);}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">AI</div>
+      <div class="brand-text"><b>منصة معرفة الـ Agent</b>صندوق الحماية الاجتماعية</div>
+    </div>
+    <div class="nav-item active" data-page="dashboard"><span class="ic">◆</span> لوحة القيادة</div>
+    <div class="nav-item" data-page="kb"><span class="ic">▤</span> قاعدة المعرفة</div>
+    <div class="nav-item" data-page="quickadd"><span class="ic">✎</span> إضافة معرفة الموظف</div>
+    <div class="nav-sep"></div>
+    <div class="nav-item" data-page="failed"><span class="ic">?</span> الأسئلة الفاشلة</div>
+    <div class="nav-item" data-page="corrections"><span class="ic">↺</span> تصحيحات الموظفين</div>
+    <div class="nav-sep"></div>
+    <div class="nav-item" data-page="approval"><span class="ic">✓</span> المراجعة والاعتماد</div>
+    <div class="nav-item" data-page="auditor"><span class="ic">⌕</span> اكتشاف الفجوات</div>
+    <div class="nav-item" data-page="package"><span class="ic">⇪</span> حزمة تغذية الـ Agent</div>
+    <div class="sidebar-foot">نموذج أولي داخلي — بيانات تجريبية للتوضيح</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">لوحة القيادة</h1>
+        <div class="sub" id="pageSub">نظرة عامة على حالة معرفة الـ Agent</div>
+      </div>
+      <div class="top-actions">
+        <input class="name-input" id="userName" placeholder="اسمك (للتوثيق)" />
+        <div class="role-toggle">
+          <button class="role-btn active" id="roleEmployeeBtn" onclick="setRole('employee')">موظف</button>
+          <button class="role-btn spec" id="roleSpecialistBtn" onclick="setRole('specialist')">مختص معتمِد</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ================= DASHBOARD ================= -->
+      <section class="page active" id="page-dashboard">
+        <div id="dbOfflineNotice"></div>
+        <div class="grid grid-4" id="kpiGrid" style="margin-bottom:22px;"></div>
+        <div class="two-col">
+          <div class="card" style="padding:18px 20px;">
+            <div class="flex-between" style="margin-bottom:10px;">
+              <h3 style="margin:0;font-size:15px;">أحدث النشاط</h3>
+            </div>
+            <div class="stack" id="recentActivity"></div>
+          </div>
+          <div class="card" style="padding:18px 20px;">
+            <h3 style="margin:0 0 10px;font-size:15px;">أهم الفجوات المكتشفة</h3>
+            <div class="stack" id="dashGaps"></div>
+            <button class="link-btn" style="margin-top:10px;" onclick="go('auditor')">عرض كل الفجوات ←</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= KNOWLEDGE BASE ================= -->
+      <section class="page" id="page-kb">
+        <div class="toolbar">
+          <input class="search" id="kbSearch" placeholder="ابحث بالعنوان أو الكلمات المفتاحية..." oninput="renderKB()">
+          <select class="select" id="kbStatusFilter" onchange="renderKB()">
+            <option value="">كل الحالات</option>
+            <option value="Draft">مسودة</option>
+            <option value="UnderReview">قيد المراجعة</option>
+            <option value="Approved">معتمدة</option>
+            <option value="Active">نشطة</option>
+            <option value="Expired">منتهية</option>
+            <option value="Retracted">ملغاة</option>
+            <option value="Archived">مؤرشفة</option>
+          </select>
+          <select class="select" id="kbTypeFilter" onchange="renderKB()">
+            <option value="">كل الأنواع</option>
+            <option>سؤال شائع</option>
+            <option>إجراء</option>
+            <option>استثناء</option>
+            <option>حالة معقدة</option>
+            <option>رد نموذجي</option>
+          </select>
+          <button class="btn btn-primary" onclick="openEditor(null)">+ معرفة جديدة</button>
+        </div>
+        <div class="card tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>العنوان</th><th>النوع</th><th>الخدمة</th><th>الحالة</th><th>الأولوية</th><th>حساسة</th><th>آخر تحديث</th><th>الإصدار</th>
+            </tr></thead>
+            <tbody id="kbTableBody"></tbody>
+          </table>
+          <div class="empty" id="kbEmpty" style="display:none;">لا توجد نتائج مطابقة</div>
+        </div>
+      </section>
+
+      <!-- ================= QUICK ADD ================= -->
+      <section class="page" id="page-quickadd">
+        <div class="two-col">
+          <div class="card" style="padding:20px 22px;">
+            <h3 style="margin-top:0;font-size:15px;">صف الحالة أو المعرفة بلغتك الطبيعية</h3>
+            <p class="small">اكتب ما حدث كما لو كنت تشرحه لزميل — النظام سيحوّله إلى مسودة معرفة منظمة عبر الذكاء الاصطناعي، ثم تراجعها قبل الإرسال للاعتماد.</p>
+            <div class="field">
+              <textarea id="quickText" style="min-height:160px;" placeholder="مثال: اتصل بي متعامل يسأل هل يمكن الجمع بين منفعة كبار السن ومنفعة الإعاقة؟ أخبرته أنه لا يجوز الجمع، تُصرف المنفعة الأعلى فقط حسب المادة كذا، إلا في حالة استثنائية إذا..."></textarea>
+            </div>
+            <button class="btn btn-gold" id="quickAiBtn" onclick="runQuickAdd()">✨ تحويل إلى معرفة منظمة (AI)</button>
+            <span class="small" id="quickAiStatus" style="margin-right:10px;"></span>
+            <div class="hr"></div>
+            <div class="small">لن يتم حفظ أي شيء تلقائيًا في قاعدة المعرفة — ستفتح المسودة في نموذج المعرفة الكامل لمراجعتها والتعديل عليها قبل الإرسال للمراجعة.</div>
+          </div>
+          <div class="card" style="padding:20px 22px;">
+            <h3 style="margin-top:0;font-size:15px;">لماذا هذه الطريقة؟</h3>
+            <div class="stack small">
+              <div>✓ يقلّل عبء التوثيق اليدوي على الموظف</div>
+              <div>✓ يفصل تلقائيًا الشروط والاستثناءات عن نص الإجابة</div>
+              <div>✓ يقترح تصنيفًا وكلمات مفتاحية بدل تركها فارغة</div>
+              <div>✓ كل مسودة تمر لاحقًا بمراجعة واعتماد قبل الوصول للـ Agent</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= FAILED QUESTIONS ================= -->
+      <section class="page" id="page-failed">
+        <div class="toolbar">
+          <div class="small">سجل الأسئلة التي لم يُجب عنها الـ Agent بثقة كافية</div>
+          <button class="btn btn-primary" style="margin-right:auto;" onclick="openFailedForm()">+ تسجيل سؤال فاشل</button>
+        </div>
+        <div class="card tbl-wrap">
+          <table>
+            <thead><tr><th>السؤال</th><th>السبب</th><th>التصنيف</th><th>القناة</th><th>التكرار</th><th>الحالة</th><th></th></tr></thead>
+            <tbody id="failedTableBody"></tbody>
+          </table>
+          <div class="empty" id="failedEmpty" style="display:none;">لا توجد أسئلة مسجلة بعد</div>
+        </div>
+      </section>
+
+      <!-- ================= CORRECTIONS ================= -->
+      <section class="page" id="page-corrections">
+        <div class="toolbar">
+          <div class="small">إجابة الـ Agent مقابل تصحيح الموظف — الفرق بينهما هو مصدر معرفة مباشر</div>
+          <button class="btn btn-primary" style="margin-right:auto;" onclick="openCorrectionForm()">+ تسجيل تصحيح</button>
+        </div>
+        <div class="stack" id="correctionsList"></div>
+        <div class="empty" id="correctionsEmpty" style="display:none;">لا توجد تصحيحات مسجلة بعد</div>
+      </section>
+
+      <!-- ================= APPROVAL ================= -->
+      <section class="page" id="page-approval">
+        <div id="approvalRoleNotice"></div>
+        <div class="stack" id="approvalList"></div>
+        <div class="empty" id="approvalEmpty" style="display:none;">لا توجد عناصر بانتظار المراجعة حاليًا</div>
+      </section>
+
+      <!-- ================= AUDITOR ================= -->
+      <section class="page" id="page-auditor">
+        <div class="grid grid-3" style="margin-bottom:20px;">
+          <div class="card kpi"><div class="num" id="auditDupCount">0</div><div class="lbl">تكرار محتمل</div></div>
+          <div class="card kpi"><div class="num" id="auditOldCount">0</div><div class="lbl">معرفة متقادمة</div></div>
+          <div class="card kpi"><div class="num" id="auditGapCount">0</div><div class="lbl">فجوات مرصودة</div></div>
+        </div>
+        <div class="card" style="padding:18px 20px; margin-bottom:16px;">
+          <h3 style="margin-top:0;font-size:15px;">أهم فجوات المعرفة (من الأسئلة الفاشلة)</h3>
+          <div class="stack" id="gapList"></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card" style="padding:18px 20px;">
+            <h3 style="margin-top:0;font-size:15px;">تكرار محتمل بين المعارف</h3>
+            <div class="small" style="margin-bottom:10px;">فحص أولي بالكلمات المفتاحية — يحتاج تأكيدًا بشريًا دائمًا</div>
+            <div class="stack" id="dupList"></div>
+          </div>
+          <div class="card" style="padding:18px 20px;">
+            <h3 style="margin-top:0;font-size:15px;">معرفة متقادمة</h3>
+            <div class="small" style="margin-bottom:10px;">نشطة منذ أكثر من 180 يومًا بدون تحديث، أو تجاوزت تاريخ انتهائها</div>
+            <div class="stack" id="oldList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PACKAGE ================= -->
+      <section class="page" id="page-package">
+        <div class="two-col">
+          <div class="card" style="padding:20px 22px;">
+            <div class="flex-between">
+              <h3 style="margin:0;font-size:15px;">الحزمة التالية الجاهزة للإصدار</h3>
+              <span class="small mono" id="lastPackageInfo"></span>
+            </div>
+            <p class="small">تضم فقط عناصر <b>معتمدة/نشطة</b> تغيّرت منذ آخر حزمة صدرت.</p>
+            <div class="grid grid-3" style="margin:14px 0;">
+              <div class="card kpi" style="box-shadow:none;"><div class="num" id="pkgAddedCount">0</div><div class="lbl">جديدة</div></div>
+              <div class="card kpi" style="box-shadow:none;"><div class="num" id="pkgUpdatedCount">0</div><div class="lbl">محدَّثة</div></div>
+              <div class="card kpi" style="box-shadow:none;"><div class="num" id="pkgRetractedCount">0</div><div class="lbl">ملغاة</div></div>
+            </div>
+            <div class="stack" id="pkgPreviewList" style="margin-bottom:14px;"></div>
+            <button class="btn btn-gold" id="issuePkgBtn" onclick="issuePackage()">إصدار الحزمة وتنزيلها (JSON)</button>
+            <span class="small" id="pkgNotice" style="margin-right:10px;"></span>
+          </div>
+          <div class="card" style="padding:20px 22px;">
+            <h3 style="margin-top:0;font-size:15px;">سجل الحزم الصادرة</h3>
+            <div class="stack" id="pkgHistory"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= EDITOR MODAL ================= -->
+<div class="overlay" id="editorOverlay">
+  <div class="panel">
+    <div class="panel-head">
+      <h3 id="editorTitle">معرفة جديدة</h3>
+      <button class="panel-close" onclick="closeEditor()">✕</button>
+    </div>
+    <div class="panel-body" id="editorBody"></div>
+    <div class="panel-foot" id="editorFoot"></div>
+  </div>
+</div>
+
+<div class="overlay" id="genericOverlay">
+  <div class="panel" style="max-width:560px;">
+    <div class="panel-head">
+      <h3 id="genericTitle">نموذج</h3>
+      <button class="panel-close" onclick="closeGeneric()">✕</button>
+    </div>
+    <div class="panel-body" id="genericBody"></div>
+    <div class="panel-foot" id="genericFoot"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ============================================================
+   STATE & CONSTANTS
+============================================================ */
+const CLIENT_ID = 'c_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+let db = null, sampleFn = null, downloadsFn = null;
+let dbAvailable = false;
+
+const state = { knowledge: [], failed: [], corrections: [], packages: [] };
+let currentRole = localStorage.getItem('kp_role') || 'employee';
+let currentPage = 'dashboard';
+let editingId = null;          // id of knowledge doc currently open in editor, or null = new
+let pendingLink = null;        // {type:'failed'|'correction', id} to link back after save
+
+const STATUS_LABELS = {
+  Draft:'مسودة', UnderReview:'قيد المراجعة', Approved:'معتمدة (بانتظار السريان)',
+  Active:'نشطة', Expired:'منتهية', Retracted:'ملغاة', Archived:'مؤرشفة'
+};
+const STATUS_BADGE = {
+  Draft:'b-draft', UnderReview:'b-review', Approved:'b-approved',
+  Active:'b-active', Expired:'b-expired', Retracted:'b-retracted', Archived:'b-archived'
+};
+
+function uid(prefix){ return (prefix||'k') + '_' + Math.random().toString(36).slice(2,9); }
+function nowIso(){ return new Date().toISOString(); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString('ar-OM',{year:'numeric',month:'short',day:'numeric'});}catch(e){return iso;} }
+function daysSince(iso){ if(!iso) return null; const d=(Date.now()-new Date(iso).getTime())/86400000; return Math.round(d); }
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toLines(s){ return (s||'').split('\n').map(x=>x.trim()).filter(Boolean); }
+function toCsv(arr){ return (arr||[]).join('، '); }
+function toast(msg, isErr){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (isErr?' err':'');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3200);
+}
+function getUserName(){ return document.getElementById('userName').value.trim() || 'مستخدم غير معرَّف'; }
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+const PAGE_META = {
+  dashboard:['لوحة القيادة','نظرة عامة على حالة معرفة الـ Agent'],
+  kb:['قاعدة المعرفة','كل Knowledge Objects بحالاتها وإصداراتها'],
+  quickadd:['إضافة معرفة الموظف','من نص حر إلى مسودة معرفة منظمة بمساعدة الذكاء الاصطناعي'],
+  failed:['الأسئلة الفاشلة','الأسئلة التي لم يُجب عنها الـ Agent بثقة كافية'],
+  corrections:['تصحيحات الموظفين','إجابة الـ Agent مقابل تصحيح الموظف'],
+  approval:['المراجعة والاعتماد','Human-in-the-Loop قبل نشر أي معرفة'],
+  auditor:['اكتشاف الفجوات','AI Knowledge Auditor: تكرار، تقادم، وفجوات'],
+  package:['حزمة تغذية الـ Agent','تصدير المعرفة المعتمدة كحزمة نسخية']
+};
+function go(page){
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+page));
+  document.getElementById('pageTitle').textContent = PAGE_META[page][0];
+  document.getElementById('pageSub').textContent = PAGE_META[page][1];
+  renderCurrentPage();
+}
+document.querySelectorAll('.nav-item').forEach(n=> n.addEventListener('click', ()=> go(n.dataset.page)));
+
+function setRole(role){
+  currentRole = role;
+  localStorage.setItem('kp_role', role);
+  document.getElementById('roleEmployeeBtn').classList.toggle('active', role==='employee');
+  document.getElementById('roleSpecialistBtn').classList.toggle('active', role==='specialist');
+  renderCurrentPage();
+}
+setRole(currentRole);
+const savedName = localStorage.getItem('kp_name');
+if(savedName) document.getElementById('userName').value = savedName;
+document.getElementById('userName').addEventListener('change', e=> localStorage.setItem('kp_name', e.target.value));
+
+function renderCurrentPage(){
+  if(currentPage==='dashboard') renderDashboard();
+  else if(currentPage==='kb') renderKB();
+  else if(currentPage==='failed') renderFailed();
+  else if(currentPage==='corrections') renderCorrections();
+  else if(currentPage==='approval') renderApproval();
+  else if(currentPage==='auditor') renderAuditor();
+  else if(currentPage==='package') renderPackage();
+}
+
+/* ============================================================
+   DB INIT, SUBSCRIPTIONS, SEEDING
+============================================================ */
+async function initCapabilities(){
+  try{ db = await claude.use('db'); }catch(e){ db = null; }
+  try{ sampleFn = await claude.use('sample'); }catch(e){ sampleFn = null; }
+  try{ downloadsFn = await claude.use('downloads'); }catch(e){ downloadsFn = null; }
+
+  if(!db){
+    dbAvailable = false;
+    document.getElementById('dbOfflineNotice').innerHTML =
+      '<div class="notice notice-warn">تعذّر الاتصال بقاعدة البيانات المشتركة لهذا العرض. جرّب فتح الصفحة من واجهة Claude مباشرة بدل نسخة محفوظة.</div>';
+    renderCurrentPage();
+    return;
+  }
+  dbAvailable = true;
+  subscribeAll();
+  seedIfEmpty();
+}
+
+function subscribeAll(){
+  db.collection('knowledge').onSnapshot(snap=>{
+    state.knowledge = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderCurrentPage();
+  }, err=> console.warn('knowledge sub error', err));
+
+  db.collection('failedQuestions').onSnapshot(snap=>{
+    state.failed = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderCurrentPage();
+  }, err=> console.warn('failed sub error', err));
+
+  db.collection('corrections').onSnapshot(snap=>{
+    state.corrections = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderCurrentPage();
+  }, err=> console.warn('corrections sub error', err));
+
+  db.collection('packages').onSnapshot(snap=>{
+    state.packages = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderCurrentPage();
+  }, err=> console.warn('packages sub error', err));
+}
+
+async function seedIfEmpty(){
+  try{
+    const lock = db.doc('meta/seedLock');
+    const res = await lock.acquire({holder:CLIENT_ID, ttlMs:20000});
+    if(!res.acquired) return;
+    const snap = await db.collection('knowledge').limit(1).get();
+    if(!snap.empty) return;
+
+    const seedKnowledge = [
+      {
+        title:'الجمع بين منفعة كبار السن ومنفعة الإعاقة', question:'هل يمكن الجمع بين منفعة كبار السن ومنفعة الإعاقة؟',
+        category:'المنافع النقدية', subCategory:'قواعد الاستحقاق', service:'منفعة كبار السن',
+        contentType:'سؤال شائع',
+        conditions:['استيفاء شروط الاستحقاق لكل منفعة على حدة'],
+        exceptions:['في حال وجود قرار خاص من اللجنة المختصة بحالة استثنائية موثقة'],
+        steps:[], answerCustomer:'لا يجوز الجمع بين منفعتين نقديتين لنفس المستفيد؛ تُصرف المنفعة ذات القيمة الأعلى فقط، ما لم يصدر قرار استثنائي من الجهة المختصة.',
+        internalNotes:'مبدأ مشترك يتكرر بصياغات قريبة عبر أكثر من منفعة — راجع القسم Auditor للتكرار المحتمل.',
+        legalArticle:'المادة (30)', sourceRef:'دليل الردود النموذجية', sourceType:'رد نموذجي',
+        effectiveDate:'2025-01-01', expiryDate:'', priority:'High', sensitive:true,
+        keywords:['جمع منافع','كبار السن','الإعاقة','استحقاق'], relatedQuestions:['هل أفقد منفعة الإعاقة إذا استحققت كبار السن؟'],
+        relatedKnowledgeIds:[], status:'Active', lineageId:null, version:1, previousVersionId:null,
+        createdBy:'فريق المعرفة', reviewedBy:'', approvedBy:'مختص الفرع التأميني', approvedAt:'2025-01-05T00:00:00.000Z'
+      },
+      {
+        title:'المستندات المطلوبة لتحديث الحساب البنكي', question:'ما المستندات المطلوبة لتحديث رقم الحساب البنكي المسجل؟',
+        category:'الخدمات الإجرائية', subCategory:'بيانات مصرفية', service:'تحديث البيانات',
+        contentType:'إجراء',
+        conditions:['أن يكون الحساب باسم المستفيد نفسه'], exceptions:[],
+        steps:['تعبئة نموذج تحديث البيانات المصرفية','إرفاق شهادة آيبان حديثة','تقديم الطلب عبر القنوات المعتمدة'],
+        answerCustomer:'لتحديث الحساب البنكي، يلزم تعبئة نموذج تحديث البيانات المصرفية وإرفاق شهادة آيبان حديثة باسم المستفيد، ثم تقديم الطلب عبر القنوات المعتمدة.',
+        internalNotes:'', legalArticle:'', sourceRef:'دليل الردود النموذجية', sourceType:'رد نموذجي',
+        effectiveDate:'2024-06-01', expiryDate:'', priority:'Medium', sensitive:false,
+        keywords:['حساب بنكي','آيبان','تحديث بيانات'], relatedQuestions:[], relatedKnowledgeIds:[],
+        status:'Active', lineageId:null, version:1, previousVersionId:null,
+        createdBy:'فريق المعرفة', reviewedBy:'', approvedBy:'مختص خدمة المتعاملين', approvedAt:'2024-06-02T00:00:00.000Z'
+      },
+      {
+        title:'حالة استثنائية: تأخر تقديم مستندات لعذر قهري', question:'ماذا لو تأخر المستفيد عن تقديم المستندات لعذر قهري (سفر علاجي مثلًا)؟',
+        category:'الحالات الاستثنائية', subCategory:'أعذار قهرية', service:'عام',
+        contentType:'استثناء',
+        conditions:['وجود عذر قهري موثق (تقرير طبي، سفر علاجي، ظرف قاهر)'],
+        exceptions:['لا يُطبَّق العذر تلقائيًا؛ يُعرض على اللجنة المختصة لتقدير الحالة'],
+        steps:['تقديم طلب مسبب مرفق بالمستند الداعم','إحالته للجنة المختصة للبت فيه'],
+        answerCustomer:'', internalNotes:'مسودة أولية بحاجة لصياغة رسمية معتمدة قبل عرضها على المتعامل.',
+        legalArticle:'', sourceRef:'حالة موثقة من الفريق المركزي', sourceType:'حالة معقدة',
+        effectiveDate:'', expiryDate:'', priority:'Medium', sensitive:true,
+        keywords:['عذر قهري','تأخر مستندات','استثناء'], relatedQuestions:[], relatedKnowledgeIds:[],
+        status:'UnderReview', lineageId:null, version:1, previousVersionId:null,
+        createdBy:'موظف خدمة المتعاملين', reviewedBy:'', approvedBy:'', approvedAt:''
+      },
+    ];
+    for(const k of seedKnowledge){
+      const ref = await db.collection('knowledge').add({...k, createdAt:nowIso(), updatedAt:nowIso()});
+      k.__id = ref.id;
+    }
+
+    await db.collection('failedQuestions').add({
+      questionText:'هل تُحسب منفعة الأمان الوظيفي ضمن الدخل عند تقييم الأهلية لمنفعة أخرى؟',
+      reason:'لا توجد معرفة كافية', category:'الأمان الوظيفي', channel:'تجاوب', count:7,
+      status:'مفتوح', linkedKnowledgeId:null, createdAt:nowIso()
+    });
+    await db.collection('failedQuestions').add({
+      questionText:'كم تستغرق مراجعة طلب إعادة النظر في قرار رفض؟', reason:'ثقة منخفضة',
+      category:'إعادة النظر', channel:'مركز الاتصال', count:4, status:'مفتوح', linkedKnowledgeId:null, createdAt:nowIso()
+    });
+    await db.collection('failedQuestions').add({
+      questionText:'هل يمكن صرف المنفعة لوكيل شرعي عن المستفيد؟', reason:'غامض',
+      category:'قواعد الصرف', channel:'البريد الإلكتروني', count:3, status:'مفتوح', linkedKnowledgeId:null, createdAt:nowIso()
+    });
+
+    await db.collection('corrections').add({
+      questionText:'هل تُصرف منفعة الطفولة لأكثر من طفل بنفس القيمة؟',
+      aiAnswer:'نعم، تُصرف منفعة الطفولة بنفس القيمة لكل طفل مسجّل دون حد أقصى.',
+      employeeAnswer:'تُصرف منفعة الطفولة لكل طفل مستحق، لكن ضمن حد أقصى لعدد الأطفال المستحقين لكل أسرة حسب اللائحة.',
+      reasonCode:'معلومة ناقصة', status:'بانتظار المعالجة', linkedKnowledgeId:null, createdAt:nowIso()
+    });
+
+    console.log('Seed complete');
+  }catch(e){ console.warn('seed skipped/failed', e); }
+}
+
+document.addEventListener('DOMContentLoaded', initCapabilities);
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+function renderDashboard(){
+  const k = state.knowledge;
+  const total = k.length;
+  const active = k.filter(x=>x.status==='Active').length;
+  const review = k.filter(x=>x.status==='UnderReview').length;
+  const openGaps = state.failed.filter(f=>f.status==='مفتوح').length;
+
+  const kpis = [
+    [total, 'إجمالي المعارف'],
+    [active, 'معارف نشطة'],
+    [review, 'بانتظار المراجعة'],
+    [openGaps, 'فجوات مفتوحة (أسئلة فاشلة)'],
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(([n,l])=>
+    `<div class="card kpi"><div class="num">${n}</div><div class="lbl">${esc(l)}</div></div>`
+  ).join('');
+
+  const activity = [];
+  k.forEach(x=> activity.push({t:x.updatedAt||x.createdAt, txt:`تحديث معرفة: «${x.title}»`, badge:STATUS_BADGE[x.status], badgeTxt:STATUS_LABELS[x.status]}));
+  state.failed.forEach(x=> activity.push({t:x.createdAt, txt:`سؤال فاشل: «${x.questionText}»`, badge:'b-draft', badgeTxt:x.status}));
+  state.corrections.forEach(x=> activity.push({t:x.createdAt, txt:`تصحيح موظف: «${x.questionText}»`, badge:'b-review', badgeTxt:x.reasonCode}));
+  activity.sort((a,b)=> (b.t||'').localeCompare(a.t||''));
+  const recentEl = document.getElementById('recentActivity');
+  recentEl.innerHTML = activity.slice(0,7).map(a=>
+    `<div class="flex-between" style="border-bottom:1px solid var(--line); padding-bottom:8px;">
+       <div style="font-size:12.5px;">${esc(a.txt)}</div>
+       <span class="badge ${a.badge}">${esc(a.badgeTxt)}</span>
+     </div>`
+  ).join('') || '<div class="small">لا يوجد نشاط بعد</div>';
+
+  const gaps = computeGaps().slice(0,4);
+  document.getElementById('dashGaps').innerHTML = gaps.map(g=>
+    `<div class="flex-between" style="border-bottom:1px solid var(--line); padding-bottom:8px;">
+       <div style="font-size:12.5px;">${esc(g.category)}</div>
+       <span class="badge b-review">${g.count} إشارة</span>
+     </div>`
+  ).join('') || '<div class="small">لا توجد فجوات مرصودة حاليًا</div>';
+}
+
+function computeGaps(){
+  const byCat = {};
+  state.failed.forEach(f=>{
+    const c = f.category || 'غير مصنف';
+    byCat[c] = (byCat[c]||0) + (f.count||1);
+  });
+  return Object.entries(byCat).map(([category,count])=>({category,count})).sort((a,b)=>b.count-a.count);
+}
+
+/* ============================================================
+   KNOWLEDGE BASE
+============================================================ */
+function renderKB(){
+  const q = (document.getElementById('kbSearch').value||'').toLowerCase();
+  const st = document.getElementById('kbStatusFilter').value;
+  const ty = document.getElementById('kbTypeFilter').value;
+  let rows = state.knowledge.filter(k=>{
+    if(st && k.status!==st) return false;
+    if(ty && k.contentType!==ty) return false;
+    if(q){
+      const hay = [k.title,k.question,(k.keywords||[]).join(' ')].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b)=> (b.updatedAt||'').localeCompare(a.updatedAt||''));
+
+  const body = document.getElementById('kbTableBody');
+  document.getElementById('kbEmpty').style.display = rows.length? 'none':'block';
+  body.innerHTML = rows.map(k=>`
+    <tr class="row-click" onclick="openEditor('${k.id}')">
+      <td><b>${esc(k.title)}</b><div class="small">${esc(k.service||'')}</div></td>
+      <td>${esc(k.contentType||'—')}</td>
+      <td>${esc(k.service||'—')}</td>
+      <td><span class="badge ${STATUS_BADGE[k.status]||'b-draft'}">${STATUS_LABELS[k.status]||k.status}</span></td>
+      <td><span class="badge b-priority-${k.priority||'Medium'}">${k.priority||'Medium'}</span></td>
+      <td>${k.sensitive? '<span class="badge b-sensitive">حساسة</span>' : '—'}</td>
+      <td class="small">${fmtDate(k.updatedAt)}</td>
+      <td class="small">v${k.version||1}</td>
+    </tr>`).join('');
+}
+
+/* ============================================================
+   FAILED QUESTIONS
+============================================================ */
+function renderFailed(){
+  const rows = [...state.failed].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  document.getElementById('failedEmpty').style.display = rows.length? 'none':'block';
+  document.getElementById('failedTableBody').innerHTML = rows.map(f=>`
+    <tr>
+      <td style="max-width:280px;">${esc(f.questionText)}</td>
+      <td><span class="badge b-review">${esc(f.reason)}</span></td>
+      <td class="small">${esc(f.category||'—')}</td>
+      <td class="small">${esc(f.channel||'—')}</td>
+      <td class="small">${f.count||1}</td>
+      <td><span class="badge ${f.status==='مفتوح'?'b-review':'b-active'}">${esc(f.status)}</span></td>
+      <td>${f.status==='مفتوح' ? `<button class="btn btn-ghost btn-sm" onclick="convertFailedToKnowledge('${f.id}')">تحويل إلى معرفة</button>` : ''}</td>
+    </tr>`).join('');
+}
+
+function convertFailedToKnowledge(fid){
+  const f = state.failed.find(x=>x.id===fid);
+  if(!f) return;
+  pendingLink = {type:'failed', id:fid};
+  openEditor(null, {
+    title:f.questionText.slice(0,60), question:f.questionText, category:f.category||'',
+    sourceType:'سؤال فاشل', sourceRef:'محوَّل من سؤال فاشل', internalNotes:'ناتج عن سؤال فاشل تكرر '+(f.count||1)+' مرة عبر '+(f.channel||'')
+  });
+}
+
+/* ============================================================
+   CORRECTIONS
+============================================================ */
+function renderCorrections(){
+  const rows = [...state.corrections].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  document.getElementById('correctionsEmpty').style.display = rows.length? 'none':'block';
+  document.getElementById('correctionsList').innerHTML = rows.map(c=>`
+    <div class="card" style="padding:16px 18px;">
+      <div class="flex-between" style="margin-bottom:10px;">
+        <b style="font-size:13.5px;">${esc(c.questionText)}</b>
+        <span class="badge b-review">${esc(c.reasonCode)}</span>
+      </div>
+      <div class="grid grid-2">
+        <div class="diff-box"><b>إجابة الـ Agent</b>${esc(c.aiAnswer)}</div>
+        <div class="diff-box" style="background:var(--ok-soft);"><b>تصحيح الموظف</b>${esc(c.employeeAnswer)}</div>
+      </div>
+      <div class="flex-between" style="margin-top:12px;">
+        <span class="small">${fmtDate(c.createdAt)}</span>
+        ${c.status!=='تم التحويل' ? `<button class="btn btn-ghost btn-sm" onclick="convertCorrectionToKnowledge('${c.id}')">تحويل إلى تحديث معرفة</button>` : `<span class="badge b-active">تم التحويل</span>`}
+      </div>
+    </div>`).join('');
+}
+
+function convertCorrectionToKnowledge(cid){
+  const c = state.corrections.find(x=>x.id===cid);
+  if(!c) return;
+  pendingLink = {type:'correction', id:cid};
+  openEditor(null, {
+    title:c.questionText.slice(0,60), question:c.questionText, answerCustomer:c.employeeAnswer,
+    sourceType:'تصحيح موظف', sourceRef:'محوَّل من تصحيح موظف',
+    internalNotes:'كانت إجابة الـ Agent السابقة: "'+c.aiAnswer+'" — سبب التصحيح: '+c.reasonCode
+  });
+}
+
+/* ============================================================
+   APPROVAL QUEUE (Human-in-the-loop)
+============================================================ */
+function renderApproval(){
+  const notice = document.getElementById('approvalRoleNotice');
+  notice.innerHTML = currentRole==='specialist'
+    ? ''
+    : '<div class="notice notice-info">أنت في وضع "موظف" — يمكنك الاطلاع على الطابور، لكن الاعتماد والإرجاع متاحان فقط في وضع "مختص معتمِد".</div>';
+
+  const rows = state.knowledge.filter(k=> k.status==='UnderReview')
+    .sort((a,b)=> (b.sensitive?1:0)-(a.sensitive?1:0) || (a.updatedAt||'').localeCompare(b.updatedAt||''));
+  document.getElementById('approvalEmpty').style.display = rows.length? 'none':'block';
+  document.getElementById('approvalList').innerHTML = rows.map(k=>`
+    <div class="card ${k.sensitive?'gap-card':''}" style="padding:16px 18px;">
+      <div class="flex-between">
+        <div>
+          <b style="font-size:14px;">${esc(k.title)}</b>
+          <div class="small">${esc(k.category||'')} • ${esc(k.service||'')} • النوع: ${esc(k.contentType||'')}</div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          ${k.sensitive?'<span class="badge b-sensitive">مالية/قانونية — تتطلب مختصًا</span>':''}
+          <span class="badge b-priority-${k.priority||'Medium'}">${k.priority||'Medium'}</span>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="small" style="margin-bottom:10px;"><b>الإجابة المقترحة للمتعامل:</b><br>${esc(k.answerCustomer||'—')}</div>
+      <div class="flex-between">
+        <button class="btn btn-ghost btn-sm" onclick="openEditor('${k.id}')">فتح كامل</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-ghost btn-sm" ${currentRole!=='specialist'?'disabled':''} onclick="reviewAction('${k.id}','reject')">إرجاع لمسودة</button>
+          <button class="btn btn-primary btn-sm" ${currentRole!=='specialist'?'disabled':''} onclick="reviewAction('${k.id}','approve')">اعتماد</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function reviewAction(id, action){
+  if(currentRole!=='specialist') return;
+  const k = state.knowledge.find(x=>x.id===id);
+  if(!k) return;
+  if(action==='approve'){
+    const isFuture = k.effectiveDate && k.effectiveDate > todayStr();
+    await db.collection('knowledge').doc(id).update({
+      status: isFuture? 'Approved' : 'Active',
+      approvedBy:getUserName(), approvedAt:nowIso(), updatedAt:nowIso()
+    });
+    if(k.previousVersionId){
+      await db.collection('knowledge').doc(k.previousVersionId).update({status:'Archived', updatedAt:nowIso()}).catch(()=>{});
+    }
+    toast('تم اعتماد المعرفة' + (isFuture? ' (سريانها من '+fmtDate(k.effectiveDate)+')' : ''));
+  }else{
+    await db.collection('knowledge').doc(id).update({status:'Draft', updatedAt:nowIso(), reviewedBy:getUserName()});
+    toast('تم إرجاعها كمسودة للمراجعة');
+  }
+}
+
+/* ============================================================
+   AUDITOR
+============================================================ */
+function kwSet(k){
+  const text = [k.title, k.question, (k.keywords||[]).join(' ')].join(' ').toLowerCase();
+  return new Set(text.split(/[\s،,.؛:\-]+/).filter(w=>w.length>2));
+}
+function jaccard(a,b){
+  let inter=0; a.forEach(w=>{ if(b.has(w)) inter++; });
+  const uni = new Set([...a,...b]).size;
+  return uni? inter/uni : 0;
+}
+function findDuplicates(){
+  const live = state.knowledge.filter(k=> ['Active','Approved','UnderReview'].includes(k.status));
+  const pairs = [];
+  for(let i=0;i<live.length;i++){
+    for(let j=i+1;j<live.length;j++){
+      const a=live[i], b=live[j];
+      if(a.lineageId && a.lineageId===b.lineageId) continue;
+      const sim = jaccard(kwSet(a), kwSet(b));
+      if(sim >= 0.34) pairs.push({a,b,sim});
+    }
+  }
+  return pairs.sort((x,y)=>y.sim-x.sim);
+}
+function findOutdated(){
+  return state.knowledge.filter(k=>{
+    if(k.status!=='Active') return false;
+    if(k.expiryDate && k.expiryDate < todayStr()) return true;
+    const days = daysSince(k.updatedAt||k.createdAt);
+    return days!==null && days > 180;
+  });
+}
+function renderAuditor(){
+  const dups = findDuplicates();
+  const olds = findOutdated();
+  const gaps = computeGaps();
+
+  document.getElementById('auditDupCount').textContent = dups.length;
+  document.getElementById('auditOldCount').textContent = olds.length;
+  document.getElementById('auditGapCount').textContent = gaps.length;
+
+  document.getElementById('gapList').innerHTML = gaps.slice(0,8).map(g=>`
+    <div class="flex-between" style="border-bottom:1px solid var(--line); padding-bottom:8px;">
+      <div>
+        <b style="font-size:13px;">${esc(g.category)}</b>
+        <div class="small">${g.count} إشارة من الأسئلة الفاشلة</div>
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="createFromGap('${esc(g.category).replace(/'/g,"\\'")}')">إنشاء معرفة</button>
+    </div>`).join('') || '<div class="small">لا توجد فجوات مرصودة</div>';
+
+  document.getElementById('dupList').innerHTML = dups.slice(0,6).map(p=>`
+    <div class="notice notice-warn" style="margin-bottom:0;">
+      <div>
+        <b>${esc(p.a.title)}</b> ↔ <b>${esc(p.b.title)}</b>
+        <div class="small">تشابه تقديري: ${Math.round(p.sim*100)}٪ — يحتاج مراجعة بشرية للتأكيد</div>
+      </div>
+    </div>`).join('') || '<div class="small">لا يوجد تكرار محتمل حاليًا</div>';
+
+  document.getElementById('oldList').innerHTML = olds.slice(0,6).map(k=>`
+    <div class="notice notice-danger" style="margin-bottom:0;">
+      <div>
+        <b>${esc(k.title)}</b>
+        <div class="small">آخر تحديث: ${fmtDate(k.updatedAt)} ${k.expiryDate && k.expiryDate<todayStr() ? '— تجاوزت تاريخ الانتهاء' : '— بلا مراجعة منذ '+daysSince(k.updatedAt)+' يومًا'}</div>
+      </div>
+    </div>`).join('') || '<div class="small">لا توجد معرفة متقادمة حاليًا</div>';
+}
+function createFromGap(category){
+  openEditor(null, {title:'معرفة جديدة حول: '+category, category, sourceType:'سؤال فاشل', sourceRef:'ناتج عن تحليل الفجوات'});
+}
+
+/* ============================================================
+   AI KNOWLEDGE PACKAGE
+============================================================ */
+function lastPackage(){
+  if(!state.packages.length) return null;
+  return [...state.packages].sort((a,b)=> (b.issuedAt||'').localeCompare(a.issuedAt||''))[0];
+}
+function computePackageDiff(){
+  const last = lastPackage();
+  const cutoff = last ? last.issuedAt : null;
+  const eligible = state.knowledge.filter(k=>
+    (k.status==='Active' || k.status==='Approved') &&
+    (!cutoff || (k.updatedAt||k.approvedAt||k.createdAt) > cutoff)
+  );
+  const added = eligible.filter(k=> (k.version||1)===1);
+  const updated = eligible.filter(k=> (k.version||1)>1);
+  const retracted = state.knowledge.filter(k=> k.status==='Retracted' && (!cutoff || (k.updatedAt||'') > cutoff));
+  return {added, updated, retracted, cutoff};
+}
+function renderPackage(){
+  const last = lastPackage();
+  document.getElementById('lastPackageInfo').textContent = last
+    ? 'آخر حزمة: '+fmtDate(last.issuedAt)+' — بواسطة '+(last.issuedBy||'—')
+    : 'لم تصدر أي حزمة بعد';
+
+  const {added, updated, retracted} = computePackageDiff();
+  document.getElementById('pkgAddedCount').textContent = added.length;
+  document.getElementById('pkgUpdatedCount').textContent = updated.length;
+  document.getElementById('pkgRetractedCount').textContent = retracted.length;
+
+  const rows = [
+    ...added.map(k=>({k,tag:'جديدة',cls:'b-active'})),
+    ...updated.map(k=>({k,tag:'محدَّثة',cls:'b-approved'})),
+    ...retracted.map(k=>({k,tag:'ملغاة',cls:'b-retracted'})),
+  ];
+  document.getElementById('pkgPreviewList').innerHTML = rows.length ? rows.map(r=>`
+    <div class="flex-between" style="border-bottom:1px solid var(--line); padding-bottom:7px;">
+      <span style="font-size:12.5px;">${esc(r.k.title)}</span>
+      <span class="badge ${r.cls}">${r.tag}</span>
+    </div>`).join('') : '<div class="small">لا توجد تغييرات جديدة تستحق إصدار حزمة الآن</div>';
+
+  document.getElementById('issuePkgBtn').disabled = (currentRole!=='specialist') || rows.length===0;
+  document.getElementById('pkgNotice').textContent = currentRole!=='specialist' ? '(إصدار الحزمة متاح لوضع "مختص معتمِد" فقط)' : '';
+
+  const hist = [...state.packages].sort((a,b)=>(b.issuedAt||'').localeCompare(a.issuedAt||''));
+  document.getElementById('pkgHistory').innerHTML = hist.map(p=>`
+    <div class="card" style="padding:12px 14px; box-shadow:none;">
+      <div class="flex-between">
+        <b class="small">${fmtDate(p.issuedAt)}</b>
+        <span class="small mono">#${p.id.slice(0,8)}</span>
+      </div>
+      <div class="small" style="margin-top:4px;">بواسطة ${esc(p.issuedBy||'—')} — ${p.addedIds.length} جديدة، ${p.updatedIds.length} محدَّثة، ${p.retractedIds.length} ملغاة</div>
+    </div>`).join('') || '<div class="small">لا يوجد سجل بعد</div>';
+}
+
+async function issuePackage(){
+  if(currentRole!=='specialist'){ toast('إصدار الحزمة يتطلب وضع مختص معتمِد', true); return; }
+  const {added, updated, retracted} = computePackageDiff();
+  if(added.length+updated.length+retracted.length===0){ toast('لا توجد تغييرات لإصدارها الآن', true); return; }
+
+  const snapshot = [...added, ...updated].map(k=>({
+    id:k.id, lineageId:k.lineageId||k.id, version:k.version||1, title:k.title, question:k.question,
+    category:k.category, subCategory:k.subCategory, service:k.service, contentType:k.contentType,
+    conditions:k.conditions||[], exceptions:k.exceptions||[], steps:k.steps||[],
+    answerCustomer:k.answerCustomer, legalArticle:k.legalArticle||'', effectiveDate:k.effectiveDate||'',
+    keywords:k.keywords||[], relatedQuestions:k.relatedQuestions||[]
+  }));
+  const retractedSnapshot = retracted.map(k=>({id:k.id, lineageId:k.lineageId||k.id, title:k.title}));
+
+  const pkgDoc = {
+    issuedAt: nowIso(), issuedBy: getUserName(),
+    addedIds: added.map(k=>k.id), updatedIds: updated.map(k=>k.id), retractedIds: retracted.map(k=>k.id),
+  };
+  const ref = await db.collection('packages').add(pkgDoc);
+
+  const fileObj = {
+    packageId: ref.id, issuedAt: pkgDoc.issuedAt, issuedBy: pkgDoc.issuedBy,
+    added: snapshot.filter(s=> added.some(a=>a.id===s.id)),
+    updated: snapshot.filter(s=> updated.some(a=>a.id===s.id)),
+    retracted: retractedSnapshot
+  };
+  const jsonStr = JSON.stringify(fileObj, null, 2);
+
+  if(downloadsFn){
+    try{
+      await downloadsFn.save({filename:'ai-knowledge-package-'+todayStr()+'.json', data:jsonStr});
+      toast('تم إصدار الحزمة وتنزيلها');
+    }catch(e){
+      toast('تم إصدار الحزمة، لكن تعذّر التنزيل ('+(e.code||'')+')', true);
+    }
+  }else{
+    toast('تم إصدار الحزمة (التنزيل غير متاح في هذا العرض)');
+  }
+}
+
+/* ============================================================
+   KNOWLEDGE OBJECT EDITOR
+============================================================ */
+function emptyKO(){
+  return {
+    title:'', question:'', category:'', subCategory:'', service:'', contentType:'سؤال شائع',
+    conditions:[], exceptions:[], steps:[], answerCustomer:'', internalNotes:'',
+    legalArticle:'', sourceRef:'', sourceType:'معرفة موظف',
+    effectiveDate:'', expiryDate:'', priority:'Medium', sensitive:false,
+    keywords:[], relatedQuestions:[], relatedKnowledgeIds:[],
+    status:'Draft', lineageId:null, version:1, previousVersionId:null,
+    createdBy:'', reviewedBy:'', approvedBy:'', approvedAt:''
+  };
+}
+function opt(value, label, current){ return `<option value="${esc(value)}" ${value===current?'selected':''}>${esc(label)}</option>`; }
+
+function openEditor(id, prefill){
+  editingId = id || null;
+  let ko;
+  if(id){
+    ko = state.knowledge.find(k=>k.id===id);
+    if(!ko){ toast('تعذّر إيجاد المعرفة', true); return; }
+  } else {
+    ko = Object.assign(emptyKO(), prefill||{});
+  }
+  document.getElementById('editorTitle').textContent = id ? ('تحرير: '+ko.title) : 'معرفة جديدة';
+  document.getElementById('editorBody').innerHTML = renderEditorForm(ko, id);
+  document.getElementById('editorFoot').innerHTML = renderEditorFoot(ko, id);
+  document.getElementById('editorOverlay').classList.add('open');
+}
+function closeEditor(){
+  document.getElementById('editorOverlay').classList.remove('open');
+  editingId = null; pendingLink = null;
+}
+
+function renderEditorForm(ko, id){
+  const statusBadge = id ? `<span class="badge ${STATUS_BADGE[ko.status]||'b-draft'}" style="margin-inline-start:8px;">${STATUS_LABELS[ko.status]||ko.status}</span> <span class="small">إصدار v${ko.version||1}</span>` : '';
+  return `
+    <div style="margin-bottom:14px;">${statusBadge}</div>
+    ${ko.internalNotes && !id ? `<div class="notice notice-info">${esc(ko.internalNotes)}</div>` : ''}
+    <div class="field"><label>العنوان *</label><input id="ef_title" value="${esc(ko.title)}" placeholder="عنوان مختصر وواضح"></div>
+    <div class="field"><label>السؤال / الاستفسار المرتبط</label><textarea id="ef_question">${esc(ko.question)}</textarea></div>
+    <div class="field-row">
+      <div class="field"><label>التصنيف الرئيسي</label><input id="ef_category" value="${esc(ko.category)}"></div>
+      <div class="field"><label>التصنيف الفرعي</label><input id="ef_subCategory" value="${esc(ko.subCategory)}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>الخدمة / المنفعة</label><input id="ef_service" value="${esc(ko.service)}"></div>
+      <div class="field"><label>نوع المحتوى</label>
+        <select id="ef_contentType">
+          ${['سؤال شائع','إجراء','استثناء','حالة معقدة','رد نموذجي'].map(v=>opt(v,v,ko.contentType)).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>الشروط (سطر لكل شرط)</label><textarea id="ef_conditions">${esc((ko.conditions||[]).join('\n'))}</textarea></div>
+    <div class="field"><label>الاستثناءات (سطر لكل استثناء)</label><textarea id="ef_exceptions">${esc((ko.exceptions||[]).join('\n'))}</textarea></div>
+    <div class="field"><label>الخطوات الإجرائية (سطر لكل خطوة)</label><textarea id="ef_steps">${esc((ko.steps||[]).join('\n'))}</textarea></div>
+    <div class="field"><label>النص المعتمد الذي يظهر للمتعامل</label><textarea id="ef_answerCustomer" style="min-height:90px;">${esc(ko.answerCustomer)}</textarea></div>
+    <div class="field"><label>ملاحظات داخلية (لا تُنشر للمتعامل ولا تدخل حزمة التغذية)</label><textarea id="ef_internalNotes">${esc(ko.internalNotes)}</textarea></div>
+    <div class="field-row">
+      <div class="field"><label>رقم المادة القانونية</label><input id="ef_legalArticle" value="${esc(ko.legalArticle)}"></div>
+      <div class="field"><label>المصدر</label><input id="ef_sourceRef" value="${esc(ko.sourceRef)}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>نوع المصدر</label>
+        <select id="ef_sourceType">
+          ${['رد نموذجي','شكوى','سؤال فاشل','تصحيح موظف','معرفة موظف','حالة معقدة'].map(v=>opt(v,v,ko.sourceType)).join('')}
+        </select>
+      </div>
+      <div class="field"><label>الأولوية</label>
+        <select id="ef_priority">
+          ${['Critical','High','Medium','Low'].map(v=>opt(v,v,ko.priority)).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>تاريخ السريان</label><input type="date" id="ef_effectiveDate" value="${esc(ko.effectiveDate||'')}"></div>
+      <div class="field"><label>تاريخ الانتهاء (إن وجد)</label><input type="date" id="ef_expiryDate" value="${esc(ko.expiryDate||'')}"></div>
+    </div>
+    <div class="field">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" id="ef_sensitive" ${ko.sensitive?'checked':''} style="width:auto;">
+        بند حساس (مالي أو قانوني) — يتطلب اعتماد مختص دائمًا
+      </label>
+    </div>
+    <div class="field"><label>الكلمات المفتاحية (مفصولة بفاصلة)</label><input id="ef_keywords" value="${esc((ko.keywords||[]).join('، '))}"></div>
+    <div class="field"><label>أسئلة مشابهة بصياغات المتعاملين (سطر لكل سؤال)</label><textarea id="ef_relatedQuestions">${esc((ko.relatedQuestions||[]).join('\n'))}</textarea></div>
+  `;
+}
+
+function readFormValues(){
+  return {
+    title: document.getElementById('ef_title').value.trim(),
+    question: document.getElementById('ef_question').value.trim(),
+    category: document.getElementById('ef_category').value.trim(),
+    subCategory: document.getElementById('ef_subCategory').value.trim(),
+    service: document.getElementById('ef_service').value.trim(),
+    contentType: document.getElementById('ef_contentType').value,
+    conditions: toLines(document.getElementById('ef_conditions').value),
+    exceptions: toLines(document.getElementById('ef_exceptions').value),
+    steps: toLines(document.getElementById('ef_steps').value),
+    answerCustomer: document.getElementById('ef_answerCustomer').value.trim(),
+    internalNotes: document.getElementById('ef_internalNotes').value.trim(),
+    legalArticle: document.getElementById('ef_legalArticle').value.trim(),
+    sourceRef: document.getElementById('ef_sourceRef').value.trim(),
+    sourceType: document.getElementById('ef_sourceType').value,
+    priority: document.getElementById('ef_priority').value,
+    effectiveDate: document.getElementById('ef_effectiveDate').value,
+    expiryDate: document.getElementById('ef_expiryDate').value,
+    sensitive: document.getElementById('ef_sensitive').checked,
+    keywords: (document.getElementById('ef_keywords').value||'').split(/[,،]/).map(s=>s.trim()).filter(Boolean),
+    relatedQuestions: toLines(document.getElementById('ef_relatedQuestions').value),
+  };
+}
+
+function renderEditorFoot(ko, id){
+  const btns = [];
+  btns.push(`<button class="btn btn-ghost" onclick="closeEditor()">إغلاق</button>`);
+
+  if(!id){
+    btns.push(`<button class="btn btn-ghost" onclick="saveKnowledge('Draft')">حفظ كمسودة</button>`);
+    btns.push(`<button class="btn btn-primary" onclick="saveKnowledge('UnderReview')">حفظ وإرسال للمراجعة</button>`);
+  } else if(ko.status==='Draft'){
+    btns.push(`<button class="btn btn-ghost" onclick="saveKnowledge('Draft')">حفظ التعديلات</button>`);
+    btns.push(`<button class="btn btn-primary" onclick="saveKnowledge('UnderReview')">إرسال للمراجعة</button>`);
+  } else if(ko.status==='UnderReview'){
+    btns.push(`<button class="btn btn-ghost" onclick="saveKnowledge('UnderReview')">حفظ التعديلات</button>`);
+    if(currentRole==='specialist'){
+      btns.push(`<button class="btn btn-ghost" onclick="reviewAction('${id}','reject'); closeEditor();">إرجاع لمسودة</button>`);
+      btns.push(`<button class="btn btn-primary" onclick="reviewAction('${id}','approve'); closeEditor();">اعتماد</button>`);
+    }
+  } else if(ko.status==='Approved' || ko.status==='Active'){
+    btns.push(`<button class="btn btn-gold" onclick="createNewVersion('${id}')">إنشاء إصدار جديد للتحديث</button>`);
+    if(currentRole==='specialist'){
+      btns.push(`<button class="btn btn-danger" onclick="retractKnowledge('${id}')">إلغاء (Retract)</button>`);
+    }
+  } else if(ko.status==='Retracted' || ko.status==='Expired'){
+    if(currentRole==='specialist'){
+      btns.push(`<button class="btn btn-ghost" onclick="archiveKnowledge('${id}')">أرشفة</button>`);
+    }
+  }
+  return btns.join('');
+}
+
+async function saveKnowledge(targetStatus){
+  if(!dbAvailable){ toast('قاعدة البيانات غير متاحة في هذا العرض', true); return; }
+  const vals = readFormValues();
+  if(!vals.title){ toast('العنوان مطلوب', true); return; }
+  const now = nowIso();
+  try{
+    if(editingId){
+      const existing = state.knowledge.find(k=>k.id===editingId);
+      await db.collection('knowledge').doc(editingId).update({
+        ...vals, status: targetStatus || existing.status, updatedAt: now,
+        reviewedBy: targetStatus==='UnderReview' ? getUserName() : (existing.reviewedBy||'')
+      });
+      toast('تم الحفظ');
+    } else {
+      const payload = {
+        ...vals, status: targetStatus||'Draft', version:1, previousVersionId:null,
+        createdBy:getUserName(), createdAt:now, updatedAt:now,
+        approvedBy:'', approvedAt:'', reviewedBy: targetStatus==='UnderReview'?getUserName():''
+      };
+      const ref = await db.collection('knowledge').add(payload);
+      await ref.update({lineageId: ref.id});
+      if(pendingLink){
+        if(pendingLink.type==='failed'){
+          await db.collection('failedQuestions').doc(pendingLink.id).update({status:'تم التحويل لمعرفة', linkedKnowledgeId: ref.id});
+        } else if(pendingLink.type==='correction'){
+          await db.collection('corrections').doc(pendingLink.id).update({status:'تم التحويل', linkedKnowledgeId: ref.id});
+        }
+      }
+      toast('تم إنشاء المعرفة');
+    }
+    closeEditor();
+  }catch(e){
+    toast('تعذّر الحفظ: '+(e.message||e.code||''), true);
+  }
+}
+
+async function createNewVersion(oldId){
+  const old = state.knowledge.find(k=>k.id===oldId);
+  if(!old) return;
+  const rest = {...old};
+  delete rest.id; delete rest.status; delete rest.approvedBy; delete rest.approvedAt;
+  delete rest.createdAt; delete rest.updatedAt; delete rest.version; delete rest.previousVersionId;
+  const payload = {
+    ...rest, status:'Draft', version:(old.version||1)+1, previousVersionId: old.id,
+    lineageId: old.lineageId || old.id, createdBy:getUserName(), createdAt:nowIso(), updatedAt:nowIso(),
+    approvedBy:'', approvedAt:'', reviewedBy:''
+  };
+  await db.collection('knowledge').add(payload);
+  toast('تم إنشاء مسودة إصدار جديد (v'+payload.version+') في قاعدة المعرفة');
+  closeEditor();
+  go('kb');
+}
+async function retractKnowledge(id){
+  if(currentRole!=='specialist') return;
+  await db.collection('knowledge').doc(id).update({status:'Retracted', updatedAt:nowIso()});
+  toast('تم إلغاء المعرفة'); closeEditor();
+}
+async function archiveKnowledge(id){
+  if(currentRole!=='specialist') return;
+  await db.collection('knowledge').doc(id).update({status:'Archived', updatedAt:nowIso()});
+  toast('تم أرشفة المعرفة'); closeEditor();
+}
+
+/* ============================================================
+   GENERIC MODAL (failed question / correction quick forms)
+============================================================ */
+function openGeneric(title, bodyHtml, footHtml){
+  document.getElementById('genericTitle').textContent = title;
+  document.getElementById('genericBody').innerHTML = bodyHtml;
+  document.getElementById('genericFoot').innerHTML = footHtml;
+  document.getElementById('genericOverlay').classList.add('open');
+}
+function closeGeneric(){ document.getElementById('genericOverlay').classList.remove('open'); }
+
+function openFailedForm(){
+  openGeneric('تسجيل سؤال فاشل', `
+    <div class="field"><label>نص السؤال *</label><textarea id="gf_q" placeholder="السؤال كما ورد من المتعامل"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>سبب الفشل</label>
+        <select id="gf_reason">
+          <option>لا توجد معرفة كافية</option><option>ثقة منخفضة</option><option>غامض</option><option>أخرى</option>
+        </select>
+      </div>
+      <div class="field"><label>القناة</label>
+        <select id="gf_channel"><option>تجاوب</option><option>مركز الاتصال</option><option>البريد الإلكتروني</option><option>أخرى</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>التصنيف</label><input id="gf_category" placeholder="مثال: منفعة كبار السن"></div>
+      <div class="field"><label>عدد مرات التكرار</label><input id="gf_count" type="number" value="1" min="1"></div>
+    </div>
+  `, `
+    <button class="btn btn-ghost" onclick="closeGeneric()">إلغاء</button>
+    <button class="btn btn-primary" onclick="submitFailedForm()">حفظ</button>
+  `);
+}
+async function submitFailedForm(){
+  const q = document.getElementById('gf_q').value.trim();
+  if(!q){ toast('نص السؤال مطلوب', true); return; }
+  await db.collection('failedQuestions').add({
+    questionText:q, reason:document.getElementById('gf_reason').value,
+    channel:document.getElementById('gf_channel').value,
+    category:document.getElementById('gf_category').value.trim(),
+    count: parseInt(document.getElementById('gf_count').value||'1',10),
+    status:'مفتوح', linkedKnowledgeId:null, createdAt:nowIso()
+  });
+  toast('تم تسجيل السؤال'); closeGeneric();
+}
+
+function openCorrectionForm(){
+  openGeneric('تسجيل تصحيح موظف', `
+    <div class="field"><label>نص السؤال *</label><textarea id="gc_q"></textarea></div>
+    <div class="field"><label>إجابة الـ Agent</label><textarea id="gc_ai"></textarea></div>
+    <div class="field"><label>تصحيح الموظف *</label><textarea id="gc_emp"></textarea></div>
+    <div class="field"><label>سبب التصحيح</label>
+      <select id="gc_reason"><option>معلومة خاطئة</option><option>معلومة ناقصة</option><option>صياغة غير واضحة</option><option>حالة استثنائية</option><option>خارج النطاق</option></select>
+    </div>
+  `, `
+    <button class="btn btn-ghost" onclick="closeGeneric()">إلغاء</button>
+    <button class="btn btn-primary" onclick="submitCorrectionForm()">حفظ</button>
+  `);
+}
+async function submitCorrectionForm(){
+  const q = document.getElementById('gc_q').value.trim();
+  const emp = document.getElementById('gc_emp').value.trim();
+  if(!q || !emp){ toast('السؤال وتصحيح الموظف مطلوبان', true); return; }
+  await db.collection('corrections').add({
+    questionText:q, aiAnswer:document.getElementById('gc_ai').value.trim(), employeeAnswer:emp,
+    reasonCode:document.getElementById('gc_reason').value, status:'بانتظار المعالجة',
+    linkedKnowledgeId:null, createdAt:nowIso()
+  });
+  toast('تم تسجيل التصحيح'); closeGeneric();
+}
+
+/* ============================================================
+   QUICK ADD — AI-assisted structuring
+============================================================ */
+function setQuickStatus(msg, spinning){
+  document.getElementById('quickAiStatus').innerHTML = msg ? (spinning?'<span class="spinner"></span> ':'') + esc(msg) : '';
+  document.getElementById('quickAiBtn').disabled = !!spinning;
+}
+async function runQuickAdd(){
+  const text = document.getElementById('quickText').value.trim();
+  if(!text){ toast('اكتب وصف الحالة أولاً', true); return; }
+  if(!sampleFn){
+    toast('ميزة الذكاء الاصطناعي غير متاحة في هذا العرض — يمكنك فتح نموذج معرفة فارغ يدويًا', true);
+    openEditor(null, {question:text, sourceType:'معرفة موظف'});
+    return;
+  }
+  setQuickStatus('جارٍ تحليل النص وهيكلته...', true);
+  try{
+    const prompt = `أنت مساعد لهيكلة المعرفة الداخلية لصندوق حماية اجتماعية حكومي عُماني.
+حوّل نص الموظف التالي إلى JSON فقط بدون أي شرح خارج JSON وبدون Markdown fences.
+الحقول المطلوبة بالضبط:
+{
+ "title": "عنوان قصير",
+ "question": "السؤال بصيغة واضحة",
+ "category": "تصنيف رئيسي مقترح",
+ "subCategory": "تصنيف فرعي مقترح",
+ "service": "الخدمة أو المنفعة المعنية إن ذُكرت",
+ "contentType": "اختر واحدًا فقط من: سؤال شائع, إجراء, استثناء, حالة معقدة",
+ "conditions": ["شرط قصير", "..."],
+ "exceptions": ["استثناء قصير", "..."],
+ "steps": ["خطوة قصيرة", "..."],
+ "answerCustomer": "فقرة رسمية مناسبة لعرضها على المتعامل، بالعربية الفصحى",
+ "keywords": ["كلمة1","كلمة2","كلمة3"],
+ "priority": "اختر واحدًا من: Critical, High, Medium, Low",
+ "sensitive": true أو false — true فقط إذا كانت تمس مبلغًا ماليًا أو شرط استحقاق قانوني
+}
+لا تخترع أرقام مواد قانونية أو مبالغ لم تُذكر في النص.
+
+نص الموظف:
+"""${text}"""`;
+    const data = await sampleFn.json(prompt, {modelTier:'default'});
+    setQuickStatus('', false);
+    openEditor(null, {
+      title:data.title||'', question:data.question||text, category:data.category||'',
+      subCategory:data.subCategory||'', service:data.service||'',
+      contentType: ['سؤال شائع','إجراء','استثناء','حالة معقدة'].includes(data.contentType)?data.contentType:'سؤال شائع',
+      conditions:Array.isArray(data.conditions)?data.conditions:[],
+      exceptions:Array.isArray(data.exceptions)?data.exceptions:[],
+      steps:Array.isArray(data.steps)?data.steps:[],
+      answerCustomer:data.answerCustomer||'', keywords:Array.isArray(data.keywords)?data.keywords:[],
+      priority:['Critical','High','Medium','Low'].includes(data.priority)?data.priority:'Medium',
+      sensitive: !!data.sensitive, sourceType:'معرفة موظف', sourceRef:'مسودة مولّدة بمساعدة الذكاء الاصطناعي — تحتاج مراجعة بشرية كاملة'
+    });
+    document.getElementById('quickText').value = '';
+  }catch(e){
+    setQuickStatus('', false);
+    const code = e && e.code;
+    if(code==='not_granted') toast('لم يُسمح باستخدام الذكاء الاصطناعي في هذا العرض', true);
+    else toast('تعذّر التحليل الآلي — يمكنك المتابعة يدويًا', true);
+    openEditor(null, {question:text, sourceType:'معرفة موظف'});
+  }
+}
+
+/* click outside modal to close */
+document.getElementById('editorOverlay').addEventListener('click', e=>{ if(e.target.id==='editorOverlay') closeEditor(); });
+document.getElementById('genericOverlay').addEventListener('click', e=>{ if(e.target.id==='genericOverlay') closeGeneric(); });
+</script>
+</body>
+</html>
